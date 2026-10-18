@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101827"><title>MH3Gスキルシミュレーター v19</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1120;--card:#151f32;--line:#33425d;--text:#f4f7fc;--muted:#b6c2d7;--accent:#7dd3fc;--blue:#263d5e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;line-height:1.5}header{padding:18px 15px;background:linear-gradient(135deg,#17243b,#263e5d);border-bottom:1px solid var(--line)}h1{font-size:1.25rem;margin:0 0 4px}header p,.muted{color:var(--muted);font-size:.86rem;margin:0}main{max-width:900px;margin:auto;padding:12px;display:grid;gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px}h2{font-size:1.04rem;margin:0 0 8px}h3{font-size:.96rem;margin:0 0 6px}label{display:block;color:var(--muted);font-size:.82rem;margin:8px 0 4px}input,select,button{font:inherit}input,select{width:100%;min-height:43px;padding:9px 10px;border-radius:10px;background:#0b1323;border:1px solid #435473;color:var(--text)}button{min-height:42px;padding:8px 12px;border-radius:10px;border:1px solid #4a5c7c;background:var(--blue);color:var(--text);font-weight:650}button.primary{background:#0e9fca;color:#061521;border-color:#0e9fca}.grid{display:grid;grid-template-columns:1fr;gap:9px}@media(min-width:620px){.grid.two{grid-template-columns:1fr 1fr}.grid.equipment{grid-template-columns:1fr 1fr}}.gear{border:1px solid var(--line);border-radius:12px;padding:10px}.gearhead{font-weight:750}.lockrow,.checkrow{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:9px;background:#0d1728;color:var(--text)}.lockrow input,.checkrow input{width:20px;min-height:20px;flex:0 0 20px}.lockrow.locked{border-color:#0e9fca;background:#102b3c}.status{padding:10px;background:#0c1526;border:1px solid var(--line);border-radius:10px}.row{display:flex;gap:8px;flex-wrap:wrap}.row button{flex:1}.tiny{font-size:.78rem;color:var(--muted)}.filter.active{background:#0e9fca;color:#061521;border-color:#0e9fca}.selected-skill-names{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}.selected-skill-names .pill{font-size:.9rem;background:#20334d;border:1px solid #526985;border-radius:999px;padding:5px 9px}.skillgroup{margin-top:12px}.skillgroup h3{margin:0}.skillgroup .group-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;text-align:left;background:#0c1526;border:1px solid var(--line);border-radius:8px;padding:10px 12px}.skillgroup .group-toggle .chevron{transition:transform .15s}.skillgroup .group-toggle[aria-expanded="true"] .chevron{transform:rotate(90deg)}.skillgroup .skillchecks[hidden]{display:none}.skillchecks{display:grid;grid-template-columns:1fr;gap:6px}@media(min-width:560px){.skillchecks{grid-template-columns:1fr 1fr}}.skillsub{font-size:.75rem;color:var(--muted);margin-left:auto;white-space:nowrap}.result{border:1px solid var(--line);border-radius:11px;padding:11px;margin-top:9px;background:#0d1728}.result strong{color:var(--accent)}.pill{display:inline-block;border:1px solid var(--line);background:#0c1526;border-radius:999px;padding:5px 8px;font-size:.8rem;margin:3px 3px 0 0}.loading{display:flex;align-items:center;gap:8px}.notice{color:#ffd58a}.result details{margin-top:7px}details.fold-section{margin-top:14px;border:1px solid var(--line);border-radius:11px;background:#0c1526;overflow:hidden}details.fold-section>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 12px;font-weight:750}details.fold-section>summary::-webkit-details-marker{display:none}details.fold-section>summary:before{content:"▶";color:var(--accent);font-size:.82rem;transition:transform .15s}details.fold-section[open]>summary:before{transform:rotate(90deg)}.fold-hint{font-size:.72rem;font-weight:500;color:var(--muted);margin-left:auto}.fold-content{padding:0 12px 12px}.fold-content>.muted{margin-bottom:8px}footer{text-align:center;color:var(--muted);font-size:.76rem;padding:10px 15px 24px}
+</style></head><body>
+<header><h1>MH3G スキルシミュレーター v19</h1><p>装備・装飾品・登録お守りの組み合わせ検索（試作版）</p></header>
+<main>
+<section class="card"><h2>検索条件</h2><p class="muted">希望スキルに合う防具・装飾品・登録済みお守りの組み合わせを検索します。データ読み込みにインターネット接続が必要です。</p><div id="dbStatus" class="status loading" style="margin-top:10px">MH3Gデータを読み込み中…</div>
+<div class="grid two" style="margin-top:10px"><div><label for="hunterClass">武器種</label><select id="hunterClass"><option value="剣士">剣士</option><option value="ガンナー">ガンナー</option></select></div><div><label for="hunterSex">性別</label><select id="hunterSex"><option value="両方">男女共用</option><option value="男">男性</option><option value="女">女性</option></select></div><div><label for="rarityMax">レア度上限</label><select id="rarityMax"><option value="99">制限なし</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select></div><div><label for="weaponSlots">武器スロット</label><select id="weaponSlots"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div></div>
+<label class="checkrow" style="margin-top:10px"><input type="checkbox" id="includeArtia"><span><strong>アーティア／アーティアXを検索に含める</strong><br><span class="tiny">チェックを外すと、アーティア系を検索対象から除外します。初期設定は除外です。</span></span></label>
+<details class="fold-section" id="fixedArmorSection"><summary><span>防具を固定（任意）</span><span class="fold-hint">タップして開閉</span></summary><div class="fold-content"><p class="muted">固定したい部位だけチェックして装備を選んでね。未固定の部位は自動で探します。</p><div id="fixedArmorList" class="grid equipment" style="margin-top:8px"></div></div></details>
+<div class="row" style="margin-top:12px"><button id="loadData" type="button">データを再読み込み</button><button id="runSearch" class="primary" type="button">装備を検索</button></div><p id="searchStatus" class="tiny" style="margin-top:8px" aria-live="polite"></p></section>
+<section class="card"><h2>お守り登録帳</h2><p class="muted">登録済みのお守りは検索時に自動で候補に含めます。お守り逆算・候補だけを探す機能はありません。</p><div class="charm"><h3 id="formTitle">お守りを新規登録</h3><label>お守り名・メモ（任意）</label><input id="charmName" placeholder="例：溜め短縮+5、スロット3"><div class="grid two"><div><label>スロット数</label><select id="charmSlots"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div><div><label>スキル1 系統名</label><div class="pointrow"><input id="charmSkill1" placeholder="例：溜め短縮"><input id="charmPoint1" type="number" value="0" aria-label="スキル1ポイント"></div></div><div><label>スキル2（任意）</label><div class="pointrow"><input id="charmSkill2" placeholder="例：抜刀会心"><input id="charmPoint2" type="number" value="0" aria-label="スキル2ポイント"></div></div></div><div class="row" style="margin-top:10px"><button class="primary" id="registerCharm">＋ お守りを登録</button><button id="cancelEdit" style="display:none">編集をキャンセル</button></div><div id="charmBook"></div></section>
+<section class="card"><h2>発動させたいスキル</h2><p class="muted">必要なスキルにチェックしてね。スキル名で検索もできます。</p><div class="row" style="margin:10px 0"><button type="button" class="filter active" data-filter="all">すべて</button><button type="button" class="filter" data-filter="sword">剣士向け</button><button type="button" class="filter" data-filter="gunner">ガンナー向け</button><button type="button" class="filter" data-filter="common">共通</button></div><input id="skillSearch" placeholder="スキル名で検索（例：集中、匠、回避性能）" style="margin-bottom:10px"><div class="tiny" id="selectedCount">選択中：0個</div><div id="selectedSkillNames" class="selected-skill-names" aria-live="polite">選択中のスキル：なし</div><div id="skillChecklist"></div><div class="row" style="margin-top:10px"><button type="button" id="clearSkills">選択をすべて解除</button></div></section>
+<section class="card"><h2>検索結果</h2><p class="muted">条件に合う装備一式と装飾品の配置を表示します。検索負荷を抑えるため、候補を絞って組み合わせを探索します。追加スキル検索は表示中の装備に固定せず、条件を満たす組み合わせ全体から探します。</p><div id="results" aria-live="polite"><p class="muted">条件を選んで「装備を検索」を押してね。</p></div></section>
+<section class="card"><h2>構成データ</h2><div class="row"><button id="saveConfig">検索条件を保存</button><button id="loadConfig">検索条件を読み込む</button><button id="exportConfig">構成をテキスト表示</button></div><textarea id="dataBox" rows="5" style="width:100%;margin-top:9px;background:#0b1323;border:1px solid #435473;border-radius:10px;color:var(--text);padding:9px" placeholder="構成メモがここに表示されます"></textarea><p id="msg" class="tiny"></p></section>
+<section class="card"><h2>試作版について</h2><p class="muted">防具・装飾品データは公開されているMH3G用データを読み込んでいます（データ出典：tompommax/MH3G-Simulator、MIT Licenseのソースを参照。ゲーム内データは別扱い）。アーティア系はMH3G@Wikiの装備情報を参考に補完しています。検索は候補を絞り込む方式のため、組み合わせが存在しても見落とす可能性があります。選択中のスキル名を一覧表示します。MH3Gの胴系統倍化は胴防具と胴の装飾品ポイントを反映します。通常検索で見つからない場合は候補数と探索状態数を増やした再検索も行います。追加スキル検索では、表示中の1セットに固定せず、条件を満たした装備の組み合わせ全体から追加可能なスキルを探します。胴系統倍化防具は部位名を明示して表示します。試作版のため組み合わせの見落としはあり得ます。</p></section>
+<section class="card" aria-label="ページ下部の検索"><h2>検索する</h2><p class="muted">条件を設定したら、ここからも検索できます。</p><button id="runSearchBottom" type="button" class="primary" style="width:100%;margin-top:10px">装備を検索</button></section>
+</main><footer>非公式のファンメイド試作版。MH3Gのゲーム内名称等の権利は各権利者に帰属します。</footer>
+<script>
+const $=id=>document.getElementById(id), SAFE=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DATA_BASE='https://raw.githubusercontent.com/tompommax/MH3G-Simulator/main/src/Mh3gSim.Core/Data/';
+let armorDB=[],decorationDB=[],skillDB=[],charms=[],editingCharmId=null,skillFilter='all',wantedSelections=new Set(),dbReady=false,lastSearchAllResults=[],lastGlobalExtraSkills=null;const collapsedGroups=new Set();
+const CHARM_KEY='mh3g-v9-charms', CONFIG_KEY='mh3g-v9-config';
+const PARTS=[['頭','頭防具'],['胴','胴防具'],['腕','腕防具'],['腰','腰防具'],['脚','脚防具']];
+const SKILL_GROUPS=[
+{title:"戦闘・基礎",skills:[
+["攻撃力UP【小】","攻撃",10,"common"],["攻撃力UP【中】","攻撃",15,"common"],["攻撃力UP【大】","攻撃",20,"common"],["見切り+1","達人",10,"common"],["見切り+2","達人",15,"common"],["見切り+3","達人",20,"common"],["状態異常攻撃+1","特殊攻撃",10,"common"],["状態異常攻撃+2","特殊攻撃",15,"common"],["属性攻撃強化","属性攻撃",10,"common"],["火属性攻撃強化+1","火属性攻撃",10,"common"],["火属性攻撃強化+2","火属性攻撃",15,"common"],["水属性攻撃強化+1","水属性攻撃",10,"common"],["水属性攻撃強化+2","水属性攻撃",15,"common"],["雷属性攻撃強化+1","雷属性攻撃",10,"common"],["雷属性攻撃強化+2","雷属性攻撃",15,"common"],["氷属性攻撃強化+1","氷属性攻撃",10,"common"],["氷属性攻撃強化+2","氷属性攻撃",15,"common"],["龍属性攻撃強化+1","龍属性攻撃",10,"common"],["龍属性攻撃強化+2","龍属性攻撃",15,"common"],["弱点特効","痛撃",10,"common"],["破壊王","重撃",10,"common"],["KO術","KO",10,"common"],["納刀術","納刀",10,"common"],["スタミナ奪取","減気攻撃",10,"common"],["集中","溜め短縮",10,"common"],["不屈","逆境",10,"common"],["フルチャージ","無傷",10,"common"],["挑戦者+1","闘魂",10,"common"],["挑戦者+2","闘魂",15,"common"],["覚醒","属性解放",10,"common"],["根性","根性",10,"common"],["逆鱗","怒",10,"common"],["飛距離強化","飛距離",10,"common"],["体術+1","体術",10,"common"],["体術+2","体術",15,"common"],["砲術師","砲術",10,"common"],["砲術王","砲術",15,"common"],["ボマー","爆弾強化",10,"common"],["笛吹き名人","笛",10,"common"]]},
+{title:"防御・回避・体力",skills:[["防御力UP【小】","防御",10,"common"],["防御力UP【中】","防御",15,"common"],["防御力UP【大】","防御",20,"common"],["回避性能+1","回避性能",10,"common"],["回避性能+2","回避性能",15,"common"],["回避距離UP","回避距離",10,"common"],["精霊の加護","加護",10,"common"],["火事場力+1","底力",10,"common"],["火事場力+2","底力",15,"common"],["力の解放+1","本気",10,"common"],["力の解放+2","本気",15,"common"],["体力+20","体力",10,"common"],["体力+50","体力",15,"common"],["体力回復量UP","回復量",10,"common"],["回復速度+1","回復速度",10,"common"],["回復速度+2","回復速度",15,"common"],["ランナー","スタミナ",10,"common"],["スタミナ急速回復","気力回復",10,"common"],["腹減り半減","腹減り",10,"common"],["腹減り無効","腹減り",15,"common"],["早食い+1","食事",10,"common"],["早食い+2","食事",15,"common"],["拾い食い","食いしん坊",15,"common"],["まんぷく","食いしん坊",10,"common"],["アイテム使用強化","効果持続",10,"common"],["自動マーキング","千里眼",15,"common"],["探知","千里眼",10,"common"],["隠密","気配",10,"common"],["広域化+1","広域",10,"common"],["広域化+2","広域",20,"common"]]},
+{title:"属性・状態異常耐性",skills:[["火耐性【小】","火耐性",10,"common"],["火耐性【大】","火耐性",15,"common"],["水耐性【小】","水耐性",10,"common"],["水耐性【大】","水耐性",15,"common"],["雷耐性【小】","雷耐性",10,"common"],["雷耐性【大】","雷耐性",15,"common"],["氷耐性【小】","氷耐性",10,"common"],["氷耐性【大】","氷耐性",15,"common"],["龍耐性【小】","龍耐性",10,"common"],["龍耐性【大】","龍耐性",15,"common"],["護法","状態耐性",10,"common"],["毒無効","毒",10,"common"],["麻痺無効","麻痺",10,"common"],["睡眠無効","睡眠",10,"common"],["気絶確率半減","気絶",10,"common"],["気絶無効","気絶",15,"common"],["耳栓","聴覚保護",10,"common"],["高級耳栓","聴覚保護",15,"common"],["金剛体","不動",10,"common"],["風圧無効","風圧",10,"common"],["風圧完全無効","風圧",15,"common"],["耐震","耐震",10,"common"],["暑さ無効","耐暑",10,"common"],["寒さ無効","耐寒",10,"common"],["抗菌","抗菌",10,"common"],["泥＆雪無効","耐泥耐雪",10,"common"],["鉄面皮","対防御DOWN",10,"common"],["属性やられ無効","属性耐性",10,"common"],["水流【小】無効","水流",10,"common"],["水流【大】無効","水流",15,"common"],["バイオドクター","細菌学",10,"common"]]},
+{title:"ガード関連",skills:[["ガード強化","ガード強化",10,"sword"],["ガード性能+1","ガード性能",10,"sword"],["ガード性能+2","ガード性能",15,"sword"],["オートガード","自動防御",10,"sword"]]},
+{title:"剣士向け",skills:[["抜刀術【技】","抜刀会心",10,"sword"],["抜刀術【力】","抜刀減気",10,"sword"],["心眼","剣術",10,"sword"],["真打","刀匠",10,"sword"],["斬れ味レベル+1","匠",10,"sword"],["業物","斬れ味",10,"sword"],["砥石使用高速化","研ぎ師",10,"sword"],]},
+{title:"ガンナー向け",skills:[["反動軽減+1","反動",10,"gunner"],["反動軽減+2","反動",15,"gunner"],["反動軽減+3","反動",20,"gunner"],["装填速度+1","装填速度",10,"gunner"],["装填速度+2","装填速度",15,"gunner"],["装填速度+3","装填速度",20,"gunner"],["装填数UP","装填数",10,"gunner"],["連発数+1","速射",10,"gunner"],["ブレ抑制+1","精密射撃",10,"gunner"],["ブレ抑制+2","精密射撃",15,"gunner"],["通常弾・連射矢UP","通常弾強化",10,"gunner"],["貫通弾・貫通矢UP","貫通弾強化",10,"gunner"],["散弾・拡散矢UP","散弾強化",10,"gunner"],["通常弾全LV追加","通常弾追加",10,"gunner"],["貫通弾LV1追加","貫通弾追加",10,"gunner"],["貫通弾全LV追加","貫通弾追加",15,"gunner"],["散弾LV1追加","散弾追加",10,"gunner"],["散弾全LV追加","散弾追加",15,"gunner"],["徹甲榴弾LV1追加","榴弾追加",10,"gunner"],["徹甲榴弾全LV追加","榴弾追加",15,"gunner"],["拡散弾LV1追加","拡散弾追加",10,"gunner"],["拡散弾全LV追加","拡散弾追加",15,"gunner"],["斬裂弾追加","斬裂弾追加",10,"gunner"],["爆破弾追加","爆破弾追加",10,"gunner"],["剛弾","射手",10,"gunner"],["強撃ビン追加","強撃瓶追加",10,"gunner"],["接撃ビン追加","接撃瓶追加",10,"gunner"],["毒ビン追加","毒瓶追加",10,"gunner"],["麻痺ビン追加","麻痺瓶追加",10,"gunner"],["睡眠ビン追加","睡眠瓶追加",10,"gunner"],["減気ビン追加","減気瓶追加",10,"gunner"],["爆破ビン追加","爆破瓶追加",10,"gunner"]]},
+{title:"採取・クエスト・その他",skills:[["捕獲の見極め","観察眼",10,"common"],["罠師","高速設置",10,"common"],["ハンター生活","狩人",10,"common"],["捕獲達人","捕獲",10,"common"],["捕獲名人","捕獲",15,"common"],["剥ぎ取り鉄人","剥ぎ取り",10,"common"],["剥ぎ取り達人","剥ぎ取り",15,"common"],["採取+1","採取",10,"common"],["採取+2","採取",15,"common"],["高速収集","高速収集",10,"common"],["お肉大好き","肉食",10,"common"],["神の気まぐれ","気まぐれ",15,"common"],["精霊の気まぐれ","気まぐれ",10,"common"],["運搬の達人","運搬",10,"common"],["こやし玉名人","こやし",10,"common"],["盗み無効","盗み無効",10,"common"],["最大数生産","調合数",10,"common"],["調合成功率+20％","調合成功率",10,"common"],["調合成功率+45％","調合成功率",15,"common"],["幸運","運気",10,"common"],["激運","運気",15,"common"],["奇面王の呼び声","号令",10,"common"],["スイマー","泳ぎ",10,"common"],["奇面王の采配","采配",10,"common"],["酸素無限","酸素",10,"common"],["燃鱗","燃鱗",10,"common"],["水神の加護","水の心",10,"common"],["ハニーハンター","ハチミツ",10,"common"],["お守りハンター","護石王",10,"common"]]}
+];
+const artiaFallback=[
+{id:990001,part:'胴',name:'アーティアメイル',class:'剣士',sex:'両方',rarity:5,defense:46,maxDefense:105,slots:1,skills:{'気力回復':2,'ガード強化':4},resist:{火:0,水:-3,氷:2,雷:-3,龍:4}},
+{id:990002,part:'腕',name:'アーティアアーム',class:'剣士',sex:'両方',rarity:5,defense:46,maxDefense:105,slots:1,skills:{'気力回復':4,'ガード強化':3},resist:{火:0,水:-3,氷:2,雷:-3,龍:4}},
+{id:990003,part:'脚',name:'アーティアグリーヴ',class:'剣士',sex:'両方',rarity:5,defense:46,maxDefense:105,slots:1,skills:{'気力回復':4,'ガード強化':3},resist:{火:0,水:-3,氷:2,雷:-3,龍:4}},
+{id:990004,part:'胴',name:'アーティアレジスト',class:'ガンナー',sex:'両方',rarity:5,defense:23,maxDefense:60,slots:1,skills:{'精密射撃':5,'反動':3},resist:{火:1,水:-2,氷:3,雷:-2,龍:5}},
+{id:990005,part:'腕',name:'アーティアガード',class:'ガンナー',sex:'両方',rarity:5,defense:23,maxDefense:60,slots:1,skills:{'精密射撃':6,'反動':3},resist:{火:1,水:-2,氷:3,雷:-2,龍:5}},
+{id:990006,part:'脚',name:'アーティアレギンス',class:'ガンナー',sex:'両方',rarity:5,defense:23,maxDefense:60,slots:1,skills:{'精密射撃':4,'反動':4},resist:{火:1,水:-2,氷:3,雷:-2,龍:5}},
+{id:990011,part:'胴',name:'アーティアXメイル',class:'剣士',sex:'両方',rarity:9,defense:80,maxDefense:114,slots:2,skills:{'ガード強化':4,'抜刀会心':2,'属性解放':1},resist:{火:0,水:-3,氷:2,雷:-3,龍:4}},
+{id:990012,part:'腕',name:'アーティアXアーム',class:'剣士',sex:'両方',rarity:9,defense:80,maxDefense:114,slots:2,skills:{'ガード強化':3,'抜刀会心':2,'属性解放':4},resist:{火:0,水:-3,氷:2,雷:-3,龍:4}},
+{id:990013,part:'脚',name:'アーティアXグリーヴ',class:'剣士',sex:'両方',rarity:9,defense:80,maxDefense:114,slots:1,skills:{'ガード強化':3,'匠':3,'属性解放':5},resist:{火:0,水:-3,氷:2,雷:-3,龍:4}},
+{id:990014,part:'胴',name:'アーティアXレジスト',class:'ガンナー',sex:'両方',rarity:9,defense:40,maxDefense:62,slots:2,skills:{'速射':3,'反動':3,'属性解放':0,'装填数':1},resist:{火:1,水:-2,氷:3,雷:-2,龍:5}},
+{id:990015,part:'腕',name:'アーティアXガード',class:'ガンナー',sex:'両方',rarity:9,defense:40,maxDefense:62,slots:2,skills:{'速射':2,'反動':3,'痛撃':3},resist:{火:1,水:-2,氷:3,雷:-2,龍:5}},
+{id:990016,part:'脚',name:'アーティアXレギンス',class:'ガンナー',sex:'両方',rarity:9,defense:40,maxDefense:62,slots:1,skills:{'速射':5,'反動':4,'属性解放':3},resist:{火:1,水:-2,氷:3,雷:-2,龍:5}}
+];
+function parseJson(text){let d=JSON.parse(text);return Array.isArray(d)?d:[]}
+async function loadData(){dbReady=false;$('dbStatus').textContent='MH3Gデータを読み込み中…';$('runSearch').disabled=true;try{let urls=['armors.json','decorations.json','skills.json'];let data=await Promise.all(urls.map(async f=>{let r=await fetch(DATA_BASE+f,{cache:'no-cache'});if(!r.ok)throw new Error(f+' の読み込みに失敗');return parseJson(await r.text())}));armorDB=data[0];decorationDB=data[1];skillDB=data[2];const existingNames=new Set(armorDB.map(a=>a.name));armorDB.push(...artiaFallback.filter(a=>!existingNames.has(a.name)));dbReady=true;$('dbStatus').innerHTML=`<strong>データ読み込み完了</strong><br>防具 ${armorDB.length.toLocaleString()}件／装飾品 ${decorationDB.length.toLocaleString()}件／スキル ${skillDB.length.toLocaleString()}件`;populateArmorSelectors();$('runSearch').disabled=false}catch(e){$('dbStatus').innerHTML='<span class="notice">データの読み込みに失敗しました。</span><br>ネット接続を確認して「データを再読み込み」を押してください。<br><span class="tiny">'+SAFE(e.message)+'</span>';}}
+function populateArmorSelectors(){const root=$('fixedArmorList');root.innerHTML='';PARTS.forEach(([part,label])=>{let card=document.createElement('div');card.className='gear';card.innerHTML=`<div class="gearhead">${label}</div><label class="lockrow"><input type="checkbox" data-lock>この部位を固定する</label><label>固定する防具</label><select data-armor><option value="">自動で検索</option></select>`;let sel=card.querySelector('[data-armor]');sel.innerHTML='<option value="">自動で検索</option>'+armorDB.filter(a=>a.part===part).sort((a,b)=>a.name.localeCompare(b.name,'ja')).map(a=>`<option value="${a.id}">${SAFE(a.name)}（${a.class}・RARE${a.rarity}・${a.slots}スロ）</option>`).join('');const lock=card.querySelector('[data-lock]');lock.addEventListener('change',()=>{sel.disabled=!lock.checked;card.classList.toggle('locked',lock.checked);if(!lock.checked)sel.value=''});sel.disabled=true;root.appendChild(card)})}
+function allSkills(){let map=new Map();SKILL_GROUPS.forEach(g=>g.skills.forEach(s=>map.set(s[0]+'|'+s[1]+'|'+s[2],s)));return [...map.values()]}
+function renderSkillChecklist(){let root=$('skillChecklist'),q=$('skillSearch').value.trim().toLowerCase();root.innerHTML='';let visible=0;SKILL_GROUPS.forEach(group=>{let rows=group.skills.filter(sk=>(skillFilter==='all'||sk[3]===skillFilter||(skillFilter==='common'&&sk[3]==='common'))&&(!q||sk[0].toLowerCase().includes(q)||sk[1].toLowerCase().includes(q)));if(!rows.length)return;let sec=document.createElement('div');sec.className='skillgroup';let h=document.createElement('h3');let toggle=document.createElement('button');toggle.type='button';toggle.className='group-toggle';toggle.innerHTML=`<span>${SAFE(group.title)} <span class="tiny">（${rows.length}）</span></span><span class="chevron" aria-hidden="true">▶</span>`;let grid=document.createElement('div');grid.className='skillchecks';let collapsed=collapsedGroups.has(group.title)&&!q;grid.hidden=collapsed;toggle.setAttribute('aria-expanded',String(!collapsed));toggle.onclick=()=>{if(grid.hidden){grid.hidden=false;collapsedGroups.delete(group.title)}else{grid.hidden=true;collapsedGroups.add(group.title)}toggle.setAttribute('aria-expanded',String(!grid.hidden))};h.appendChild(toggle);sec.appendChild(h);rows.forEach(sk=>{visible++;let key=sk[0]+'|'+sk[1]+'|'+sk[2];let lab=document.createElement('label');lab.className='checkrow';lab.innerHTML=`<input type="checkbox" data-key="${SAFE(key)}" ${wantedSelections.has(key)?'checked':''}><span>${SAFE(sk[0])}</span><span class="skillsub">${sk[2]}pt</span>`;lab.querySelector('input').onchange=e=>{if(e.target.checked)wantedSelections.add(key);else wantedSelections.delete(key);updateSelectedCount()};grid.appendChild(lab)});sec.appendChild(grid);root.appendChild(sec)});if(!visible)root.innerHTML='<p class="muted">該当するスキルがありません。</p>';updateSelectedCount()}
+function updateSelectedCount(){
+  $('selectedCount').textContent=`選択中：${wantedSelections.size}個`;
+  const box=$('selectedSkillNames');
+  if(box){
+    const names=[...wantedSelections].map(k=>k.split('|')[0]);
+    box.innerHTML=names.length?`<span class="tiny">選択中のスキル：</span>`+names.map(n=>`<span class="pill">${SAFE(n)}</span>`).join(''):'<span class="tiny">選択中のスキル：なし</span>';
+  }
+}
+$('skillSearch').addEventListener('input',renderSkillChecklist);document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{skillFilter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));renderSkillChecklist()});$('clearSkills').onclick=()=>{wantedSelections.clear();renderSkillChecklist()};
+function persistCharms(){localStorage.setItem(CHARM_KEY,JSON.stringify(charms))}function renderCharms(){let root=$('charmBook');root.innerHTML=`<h3 style="margin-top:12px">登録済み：${charms.length}個</h3>`;if(!charms.length){root.innerHTML+='<p class="muted">まだお守りがありません。検索にはお守りなしでも対応します。</p>';return}charms.forEach((c,i)=>{let d=document.createElement('div');d.className='result';d.innerHTML=`<strong>${i+1}. ${SAFE(c.name||'名前なしのお守り')}</strong>（${c.slots}スロ）<div class="tiny">${(c.skills||[]).map(s=>SAFE(s[0])+' '+(s[1]>0?'+':'')+s[1]).join(' ／ ')}</div><div class="row" style="margin-top:6px"><button data-edit="${c.id}">編集</button><button data-del="${c.id}">削除</button></div>`;d.querySelector('[data-edit]').onclick=()=>editCharm(c.id);d.querySelector('[data-del]').onclick=()=>{charms=charms.filter(x=>x.id!==c.id);persistCharms();renderCharms()};root.appendChild(d)})}
+function resetCharm(){editingCharmId=null;$('formTitle').textContent='お守りを新規登録';$('registerCharm').textContent='＋ お守りを登録';$('cancelEdit').style.display='none';$('charmName').value='';$('charmSlots').value='0';$('charmSkill1').value='';$('charmPoint1').value='0';$('charmSkill2').value='';$('charmPoint2').value='0'}function editCharm(id){let c=charms.find(x=>x.id===id);if(!c)return;editingCharmId=id;$('formTitle').textContent='お守りを編集';$('registerCharm').textContent='変更を保存';$('cancelEdit').style.display='block';$('charmName').value=c.name||'';$('charmSlots').value=c.slots;$('charmSkill1').value=c.skills?.[0]?.[0]||'';$('charmPoint1').value=c.skills?.[0]?.[1]||0;$('charmSkill2').value=c.skills?.[1]?.[0]||'';$('charmPoint2').value=c.skills?.[1]?.[1]||0}
+$('cancelEdit').onclick=resetCharm;$('registerCharm').onclick=()=>{let c={id:editingCharmId||Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:$('charmName').value.trim(),slots:+$('charmSlots').value,skills:[[$('charmSkill1').value.trim(),+$('charmPoint1').value||0],[$('charmSkill2').value.trim(),+$('charmPoint2').value||0]].filter(x=>x[0])};if(!c.skills.length){alert('スキル系統名を1つ以上入力してね。');return}if(editingCharmId)charms=charms.map(x=>x.id===editingCharmId?c:x);else charms.push(c);persistCharms();renderCharms();resetCharm()};
+function requirements(){return [...wantedSelections].map(k=>{let [display,system,need]=k.split('|');return {display,system,need:+need}})}function fixedSelections(){return [...$('fixedArmorList').querySelectorAll('.gear')].map((g,i)=>{let locked=g.querySelector('[data-lock]').checked,id=g.querySelector('[data-armor]').value;return {part:PARTS[i][0],locked,id}})}function allowedArmor(a,part){let cls=$('hunterClass').value,sex=$('hunterSex').value,rarity=+$('rarityMax').value;return a.part===part&&(a.class==='両方'||a.class===cls)&&(a.sex==='両方'||sex==='両方'||a.sex===sex)&&a.rarity<=rarity&&($('includeArtia').checked||!(/アーティア/.test(a.name||'')))}
+function isTorsoUpArmor(a){return !!a && a.part!=='胴' && a.part!=='腕' && (a.torsoUp===true||a.torsoMultiplier===true||Number(a.skills?.['胴系統倍化']||0)>0||Number(a.skills?.['胴系統複製']||0)>0)}
+function armorDisplayName(a){return isTorsoUpArmor(a)?`胴系統倍化防具（${a.name}）`:a.name}
+function scoreArmor(a,req){let score=(a.maxDefense||a.defense||0)*0.02+(a.slots||0)*1.5;for(let r of req){let p=+(a.skills?.[r.system]||0);score+=Math.max(0,p)*2.2-Math.max(0,-p)*1.5}if(isTorsoUpArmor(a))score+=1;return score}
+function armorCandidates(req,limit=55){
+  let fixed=fixedSelections(),out={};
+  for(let [part] of PARTS){
+    let f=fixed.find(x=>x.part===part);
+    if(f?.locked){
+      let a=armorDB.find(x=>String(x.id)===String(f.id));
+      if(!a||!allowedArmor(a,part))return null;
+      out[part]=[a];
+    }else{
+      let candidates=armorDB.filter(a=>allowedArmor(a,part));
+      candidates.sort((a,b)=>scoreArmor(b,req)-scoreArmor(a,req));
+      const top=candidates.slice(0,limit);
+      // Never discard torso-doubling pieces merely because their own skill score
+      // is low: they can be essential to a valid set.
+      for(const a of candidates){
+        if(isTorsoUpArmor(a) && !top.some(x=>String(x.id)===String(a.id))) top.push(a);
+      }
+      out[part]=top;
+    }
+  }
+  return out;
+}
+function addSkills(target,skills,mult=1){Object.entries(skills||{}).forEach(([k,v])=>target[k]=(target[k]||0)+Number(v||0)*mult)}
+function makeDecorationFit(base,slots,req,torsoCount=0,chestName=''){
+  let sums={...base},
+      remaining=slots.map(s=>({slots:s.slots,where:s.where,used:[]})),
+      placed=[];
+  const deco=decorationDB.filter(d=>d.slots>=1&&d.slots<=3);
+  for(const r of req){
+    let need=r.need-(sums[r.system]||0);
+    if(need<=0)continue;
+    const useful=deco.filter(d=>(d.skills?.[r.system]||0)>0)
+      .sort((a,b)=>((b.skills[r.system]||0)/b.slots)-((a.skills[r.system]||0)/a.slots));
+    let guard=0;
+    while(need>0&&guard++<12){
+      let choice=null,slotIndex=-1,contribution=0;
+      // Prefer a decoration placement that makes progress after the actual
+      // torso-up multiplier is applied, including a slot in the chest armor.
+      for(const d of useful){
+        const ix=remaining.findIndex(s=>s.slots>=d.slots);
+        if(ix<0)continue;
+        const mult=remaining[ix].where===chestName?1+torsoCount:1;
+        const value=(d.skills?.[r.system]||0)*mult;
+        if(value>0){choice=d;slotIndex=ix;contribution=value;break}
+      }
+      if(!choice)break;
+      remaining[slotIndex].slots-=choice.slots;
+      remaining[slotIndex].used.push(choice.name);
+      placed.push({name:choice.name,where:remaining[slotIndex].where,skills:choice.skills,slots:choice.slots});
+      addSkills(sums,choice.skills);
+      if(remaining[slotIndex].where===chestName&&torsoCount>0){
+        addSkills(sums,choice.skills,torsoCount);
+      }
+      need=r.need-(sums[r.system]||0);
+    }
+  }
+  return {sums,placed,remaining};
+}
+function scoreState(state,req){let deficit=0;for(let r of req)deficit+=Math.max(0,r.need-(state.sums[r.system]||0))*12;return state.defense*0.15+state.slots*1.1-deficit}
+function buildArmorStates(candidates,req,stateLimit=1600){
+  let states=[{items:[],sums:{},slots:0,defense:0}];
+  for(let [part] of PARTS){
+    let next=[];
+    for(let st of states)for(let a of candidates[part]){
+      const items=[...st.items,a];
+      const sums={};
+      for(const piece of items)addSkills(sums,piece.skills);
+      const count=torsoMultiplierCount(items);
+      const chest=items.find(x=>x.part==='胴');
+      // Add the chest armor's skill points once per torso-up piece, while
+      // candidates are still being ranked, not only after the search.
+      if(count>0&&chest)addSkills(sums,chest.skills,count);
+      next.push({
+        items,
+        sums,
+        slots:st.slots+(a.slots||0),
+        defense:st.defense+(a.maxDefense||a.defense||0)
+      });
+    }
+    next.sort((a,b)=>scoreState(b,req)-scoreState(a,req));
+    states=next.slice(0,stateLimit);
+  }
+  return states;
+}
+function torsoMultiplierCount(items){return items.filter(isTorsoUpArmor).length}
+function fitTorsoMultiplier(items,sums){const count=torsoMultiplierCount(items);const chest=items.find(a=>a.part==='胴');if(count>0&&chest)addSkills(sums,chest.skills,count);return sums}
+function decorateAndEvaluate(state,charm,req,weaponSlots){let sums={...state.sums};if(charm){let charmSkills={};(charm.skills||[]).forEach(pair=>{const key=String(pair[0]||'').trim();if(key)charmSkills[key]=(charmSkills[key]||0)+Number(pair[1]||0)});addSkills(sums,charmSkills)}let slots=[{slots:weaponSlots,where:'武器'}];state.items.forEach(a=>slots.push({slots:a.slots||0,where:a.name}));if(charm)slots.push({slots:charm.slots||0,where:charm.name||'お守り'});const torsoCount=torsoMultiplierCount(state.items);const chest=state.items.find(a=>a.part==='胴');let fit=makeDecorationFit(sums,slots,req,torsoCount,chest?.name||'');
+let missing=req.filter(r=>(fit.sums[r.system]||0)<r.need);let defense=state.defense;let charmHelp=req.reduce((n,r)=>n+Math.max(0,Number(charm?.skills?.find(x=>x[0]===r.system)?.[1]||0)),0);return {items:state.items,charm,fit,missing,defense,score:missing.reduce((t,r)=>t+(r.need-(fit.sums[r.system]||0))*100,0)-defense-fit.placed.length*0.25-charmHelp*2}}
+function runSearch(){lastGlobalExtraSkills=null;if(!dbReady){$('searchStatus').textContent='データ読み込みが完了していません。';return}let req=requirements();if(!req.length){$('searchStatus').textContent='先に発動させたいスキルを1つ以上選んでね。';return}let candidates=armorCandidates(req);if(!candidates){$('searchStatus').textContent='固定防具の選択を確認してね。';return}for(let [part] of PARTS){if(!candidates[part]?.length){$('searchStatus').textContent=part+'の候補防具がありません。武器種・性別・レア度・アーティア設定を確認してね。';return}}$('results').innerHTML='<div class="status">組み合わせを検索中…</div>';$('runSearch').disabled=true;if($('runSearchBottom'))$('runSearchBottom').disabled=true;setTimeout(()=>{try{let states=buildArmorStates(candidates,req);let charmOptions=[null,...charms];let results=[];for(let st of states){for(let ch of charmOptions){let r=decorateAndEvaluate(st,ch,req,+$('weaponSlots').value);if(!r.missing.length)results.push(r)}}let usedTorsoFallback=false;if(!results.length){/* Second pass: widen armor candidates and keep more partial sets, then verify actual totals including chest decorations doubled by torso-up. */usedTorsoFallback=true;const wideCandidates=armorCandidates(req,120);const wideStates=buildArmorStates(wideCandidates,req,7000);for(let st of wideStates){for(let ch of charmOptions){let r=decorateAndEvaluate(st,ch,req,+$('weaponSlots').value);if(!r.missing.length)results.push(r)}}candidates=wideCandidates;}let uniq=new Map();results.sort((a,b)=>a.score-b.score);for(let r of results){let key=r.items.map(a=>a.id).join(',')+'|'+(r.charm?.id||'none')+'|'+r.fit.placed.map(x=>x.name+'@'+x.where).join(',');if(!uniq.has(key))uniq.set(key,r)}let allUnique=[...uniq.values()].sort((a,b)=>a.score-b.score);lastSearchAllResults=allUnique;let chosen=[],usedKeys=new Set();const charmIds=[...charms.map(c=>c.id),null];for(const cid of charmIds){const match=allUnique.find(r=>(r.charm?.id||null)===cid);if(match){const key=match.items.map(a=>a.id).join(',')+'|'+(match.charm?.id||'none')+'|'+match.fit.placed.map(x=>x.name+'@'+x.where).join(',');if(!usedKeys.has(key)){chosen.push(match);usedKeys.add(key)}}}for(const r of allUnique){if(chosen.length>=30)break;const key=r.items.map(a=>a.id).join(',')+'|'+(r.charm?.id||'none')+'|'+r.fit.placed.map(x=>x.name+'@'+x.where).join(',');if(!usedKeys.has(key)){chosen.push(r);usedKeys.add(key)}}results=chosen.sort((a,b)=>a.score-b.score);$('searchStatus').textContent=`検索完了：候補 ${Object.values(candidates).map(a=>a.length).join(' / ')}件/部位から探索。${usedTorsoFallback?'通常検索で見つからなかったため、候補を広げた再検索も実施。':''}条件を満たす装備 ${results.length}件を表示。`;renderResults(results,req);if(!results.length){$('results').innerHTML='<div class="status">今回の探索範囲では条件を満たす装備が見つかりませんでした。候補を広げるため、固定を外す・レア度を上げる・必要スキルを減らすなど試してね。※試作版のため、存在する組み合わせを見落とす場合があります。</div>'}setTimeout(()=>{$('results').scrollIntoView({behavior:'smooth',block:'start'})},120)}catch(e){$('results').innerHTML='<div class="status notice">検索中にエラーが発生しました：'+SAFE(e.message)+'</div>';$('searchStatus').textContent='';}finally{$('runSearch').disabled=false;if($('runSearchBottom'))$('runSearchBottom').disabled=false}},30)}
+function skillCanBeAddedGlobally(skill,req){
+  // Always search the full set from scratch; never lock the currently displayed armor.
+  const req2=[...req,{display:skill[0],system:skill[1],need:skill[2]}];
+  const charmOptions=[null,...charms];
+  const weaponSlots=+$('weaponSlots').value;
+  const trySearch=(limit,stateLimit)=>{
+    const candidates=armorCandidates(req2,limit);
+    if(!candidates)return false;
+    for(const [part] of PARTS)if(!candidates[part]?.length)return false;
+    const states=buildArmorStates(candidates,req2,stateLimit);
+    for(const st of states){
+      for(const ch of charmOptions){
+        const result=decorateAndEvaluate(st,ch,req2,weaponSlots);
+        if(!result.missing.length)return true;
+      }
+    }
+    return false;
+  };
+  // A broader second pass helps skills such as Bombardier, which may depend on
+  // a less obvious armor/deco/charm combination and can be pruned by the quick pass.
+  if(trySearch(110,1800))return true;
+  return trySearch(skill[0]==='ボマー'?180:140,skill[0]==='ボマー'?9000:4200);
+}
+async function extraSkillsForResult(r,req,progress){
+  // Candidate skills are tested with a fresh full-set search for each one.
+  const selectedMax=new Map();
+  for(const q of req)selectedMax.set(q.system,Math.max(selectedMax.get(q.system)||0,q.need));
+  const availableSystems=new Set();
+  for(const a of armorDB)for(const [k,v] of Object.entries(a.skills||{}))if(Number(v))availableSystems.add(k);
+  for(const d of decorationDB)for(const [k,v] of Object.entries(d.skills||{}))if(Number(v))availableSystems.add(k);
+  for(const c of charms)for(const [k,v] of (c.skills||[]))if(k&&Number(v))availableSystems.add(k);
+  const hunterClass=$('hunterClass').value;
+  const candidates=allSkills().filter(sk=>{
+    if(!availableSystems.has(sk[1])||sk[2]<=(selectedMax.get(sk[1])||0))return false;
+    // Sword users should not be offered gunner-only skills, but Load Up is useful
+    // on Gunlance (a sword-class weapon), so keep that one exception.
+    if(hunterClass==='剣士'&&sk[3]==='gunner'&&sk[0]!=='装填数UP')return false;if(hunterClass==='ガンナー'&&sk[3]==='sword')return false;
+    return true;
+  });
+  const out=[];
+  for(let i=0;i<candidates.length;i++){
+    if(progress)progress(i+1,candidates.length,candidates[i][0]);
+    const sk=candidates[i];
+    if(await new Promise(resolve=>setTimeout(()=>resolve(skillCanBeAddedGlobally(sk,req)),0)))out.push({skill:sk,already:false,used:[]});
+  }
+  return out;
+}
+async function renderExtraSkills(panel,r,req){
+  panel.innerHTML='<p class="tiny">追加スキル候補を確認中…装備全体を組み直して検索しています。</p>';
+  const extras=await extraSkillsForResult(r,req,(n,total,name)=>{
+    panel.firstElementChild.textContent=`装備全体を再検索中… ${n}/${total}：${name}`;
+  });
+  panel.innerHTML='';
+  if(!extras.length){panel.innerHTML='<p class="muted">選択中のスキルを維持したまま追加できるスキルは、今回の探索範囲では見つかりませんでした。現在表示中の装備だけでなく、装備一式を組み直して確認しました。</p>';return;}
+  const intro=document.createElement('p');intro.className='tiny';intro.textContent='候補ごとに頭・胴・腕・腰・脚・装飾品・お守りを組み直して確認しました。候補を選ぶと、選択中のスキルを維持したまま、そのスキルも条件に加えて再検索します。';panel.appendChild(intro);
+  const list=document.createElement('div');list.className='skillchecks';
+  extras.sort((a,b)=>a.skill[0].localeCompare(b.skill[0],'ja')).forEach(item=>{
+    const sk=item.skill,row=document.createElement('div');row.className='checkrow';
+    const label=document.createElement('span');label.style.flex='1';label.textContent=sk[0]+'（'+sk[2]+'pt）';
+    const btn=document.createElement('button');btn.type='button';btn.textContent='追加して再検索';btn.style.fontSize='.78rem';btn.style.padding='6px 8px';
+    btn.onclick=()=>{wantedSelections.add(sk[0]+'|'+sk[1]+'|'+sk[2]);renderSkillChecklist();runSearch();window.scrollTo({top:0,behavior:'smooth'});};
+    row.append(label,btn);list.appendChild(row);
+  });panel.appendChild(list);
+}
+function renderResults(results,req){let root=$('results');root.innerHTML='';if(!results.length)return;results.forEach((r,i)=>{let d=document.createElement('div');d.className='result';let skills=Object.entries(r.fit.sums).filter(([k,v])=>v&&k!=='胴系統倍化'&&k!=='胴系統複製').sort((a,b)=>a[0].localeCompare(b[0],'ja')).map(([k,v])=>`<span class="pill">${SAFE(k)} ${v>0?'+':''}${v}</span>`).join('');d.innerHTML=`<strong>候補 ${i+1}</strong>　防御力目安 ${r.defense}<div style="margin-top:7px">${r.items.map(a=>`<span class="pill">${SAFE(a.part)}：${SAFE(armorDisplayName(a))}（${a.slots}スロ）</span>`).join('')}</div><div style="margin-top:5px"><span class="pill">お守り：${SAFE(r.charm ? (r.charm.name||'名前なしのお守り') : 'なし')}</span></div>${r.charm && (r.charm.skills||[]).some(p=>String(p[0]||'').trim() && Number(p[1]||0)!==0) ? `<div class="tiny" style="margin-top:4px">お守りのスキルポイント：${r.charm.skills.filter(p=>String(p[0]||'').trim() && Number(p[1]||0)!==0).map(p=>`${SAFE(p[0])} ${Number(p[1])>0?'+':''}${Number(p[1])}`).join(' ／ ')}</div>` : ''}<details><summary>装飾品・スキルポイント詳細</summary><p class="tiny">装飾品の配置：${r.fit.placed.length?r.fit.placed.map(x=>`${SAFE(x.name)} → ${SAFE(x.where)}`).join('、'):'なし'}</p><div>${skills}</div></details><button type="button" class="extra-skill-toggle" style="width:100%;margin-top:9px">装備全体から追加スキル検索</button><div class="extra-skill-panel" hidden style="margin-top:8px"></div>`;const btn=d.querySelector('.extra-skill-toggle'),panel=d.querySelector('.extra-skill-panel');btn.onclick=()=>{if(!panel.hidden){panel.hidden=true;btn.textContent='装備全体から追加スキル検索';return;}panel.hidden=false;btn.textContent='追加スキル候補を閉じる';panel.dataset.loaded='';renderExtraSkills(panel,r,req).catch(e=>{panel.innerHTML='<p class="notice">追加スキル検索でエラーが発生しました：'+SAFE(e.message)+'</p>'})};root.appendChild(d)})}
+$('runSearch').onclick=runSearch;if($('runSearchBottom'))$('runSearchBottom').onclick=runSearch;$('loadData').onclick=loadData;
+function getConfig(){return {hunterClass:$('hunterClass').value,hunterSex:$('hunterSex').value,rarityMax:$('rarityMax').value,weaponSlots:$('weaponSlots').value,includeArtia:$('includeArtia').checked,fixed:fixedSelections(),wantedSkills:[...wantedSelections],charms}}
+function applyConfig(c){if(!c)return;$('hunterClass').value=c.hunterClass||'剣士';$('hunterSex').value=c.hunterSex||'両方';$('rarityMax').value=String(c.rarityMax||99);$('weaponSlots').value=String(c.weaponSlots||0);$('includeArtia').checked=!!c.includeArtia;wantedSelections=new Set(c.wantedSkills||[]);if(Array.isArray(c.charms)&&c.charms.length){const known=new Set(charms.map(x=>x.id));charms=[...charms,...c.charms.filter(x=>!known.has(x.id))];persistCharms()}if(dbReady){populateArmorSelectors();fixedSelections().forEach(()=>{});(c.fixed||[]).forEach((f,i)=>{let g=$('fixedArmorList').children[i];if(!g)return;g.querySelector('[data-lock]').checked=!!f.locked;let sel=g.querySelector('[data-armor]');sel.disabled=!f.locked;sel.value=f.id||'';g.classList.toggle('locked',!!f.locked)})}renderSkillChecklist();renderCharms()}
+$('saveConfig').onclick=()=>{localStorage.setItem(CONFIG_KEY,JSON.stringify(getConfig()));$('msg').textContent='検索条件を保存しました。お守り登録帳も自動保存されています。'};$('loadConfig').onclick=()=>{try{let s=localStorage.getItem(CONFIG_KEY);if(!s){$('msg').textContent='保存データがありません。';return}applyConfig(JSON.parse(s));$('msg').textContent='検索条件を読み込みました。'}catch(e){$('msg').textContent='読み込みに失敗しました。'}};$('exportConfig').onclick=()=>{$('dataBox').value=JSON.stringify(getConfig(),null,2);$('msg').textContent='構成データを表示しました。コピーして保存できます。'};
+function loadSavedCharms(){const keys=[CHARM_KEY,'mh3g-v8-charms','mh3g-v7-charms','mh3g-sim-charms-v1'];let merged=[],seen=new Set();for(const key of keys){try{const arr=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(arr))for(const c of arr){if(!c||!Array.isArray(c.skills))continue;const signature=JSON.stringify({name:c.name||'',slots:Number(c.slots)||0,skills:c.skills.map(x=>[String(x[0]||''),Number(x[1])||0])});if(!seen.has(signature)){seen.add(signature);merged.push({...c,id:c.id||Date.now().toString(36)+Math.random().toString(36).slice(2,7),slots:Number(c.slots)||0,skills:c.skills.map(x=>[String(x[0]||''),Number(x[1])||0])})}}}catch(e){}}return merged}charms=loadSavedCharms();persistCharms();renderCharms();renderSkillChecklist();loadData().then(()=>{try{let c=localStorage.getItem(CONFIG_KEY)||localStorage.getItem('mh3g-v8-config')||localStorage.getItem('mh3g-v7-config');if(c)applyConfig(JSON.parse(c))}catch(e){}});
+</script></body></html>
