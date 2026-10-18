@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#172033">
+<title>MH3G スキルシミュレーター</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d30;--line:#2d3a55;--text:#f2f5fb;--muted:#aeb9ce;--accent:#7dd3fc;--good:#86efac}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;line-height:1.5}
+header{padding:22px 16px 18px;background:linear-gradient(135deg,#172033,#263957);border-bottom:1px solid var(--line)}
+h1{font-size:1.35rem;margin:0 0 5px}header p{margin:0;color:#d1d9e8;font-size:.9rem}
+main{max-width:850px;margin:auto;padding:14px;display:grid;gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px}
+h2{font-size:1.05rem;margin:0 0 12px}.note{color:var(--muted);font-size:.88rem}
+.grid{display:grid;grid-template-columns:1fr;gap:10px}@media(min-width:600px){.grid.two{grid-template-columns:1fr 1fr}}
+label{display:block;font-size:.9rem;color:var(--muted);margin-bottom:5px}input,select,button,textarea{font:inherit}input,select,textarea{width:100%;background:#0b1222;border:1px solid #3a4967;border-radius:10px;padding:11px;color:var(--text);min-height:44px}
+button{border:0;border-radius:10px;padding:11px 14px;background:#0ea5e9;color:#061321;font-weight:700;min-height:44px;cursor:pointer}button.secondary{background:#293750;color:var(--text);border:1px solid #42516d}button.danger{background:#492630;color:#ffdbe2;border:1px solid #854252}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.slots{display:grid;grid-template-columns:1fr;gap:9px}.gear{display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center}.gear strong{font-size:.9rem}.skillrow{display:grid;grid-template-columns:minmax(0,1fr) 92px 38px;gap:7px;margin-bottom:8px;align-items:center}.skillrow input{min-width:0}.skillrow button{padding:7px;min-height:42px}
+.pills{display:flex;flex-wrap:wrap;gap:7px}.pill{border:1px solid var(--line);background:#0b1222;border-radius:999px;padding:7px 10px;font-size:.9rem}.pill b{color:var(--accent)}
+.status{padding:12px;border-radius:10px;background:#0b1222;border:1px solid var(--line)}.warn{color:#fde68a}.small{font-size:.8rem;color:var(--muted)}footer{text-align:center;color:var(--muted);padding:5px 18px 25px;font-size:.8rem}
+</style>
+</head>
+<body>
+<header><h1>MH3G スキルシミュレーター</h1><p>スマホ向け試作版 · 装備構成とスキルポイントを整理</p></header>
+<main>
+<section class="panel">
+<h2>装備メモ</h2>
+<p class="note">防具名・スロット数・スキルポイントを入力して構成を管理できます。装備データベースを組み込む前の試作版です。</p>
+<div class="slots" id="gearSlots"></div>
+</section>
+<section class="panel">
+<h2>護石</h2>
+<div class="grid two">
+<div><label for="charmName">護石名（任意）</label><input id="charmName" placeholder="例：溜め短縮 +5"></div>
+<div><label for="charmSlots">護石スロット数</label><select id="charmSlots"><option>0</option><option>1</option><option>2</option><option>3</option></select></div>
+</div>
+<div id="charmSkills" style="margin-top:12px"></div>
+<button class="secondary" id="addCharmSkill">＋ 護石のスキルポイントを追加</button>
+</section>
+<section class="panel">
+<h2>スキルポイント集計</h2>
+<p class="note">入力したポイントを合算します。MH3Gの発動ポイントはスキルごとに異なるため、この試作版では発動判定を自動で決めず、合計値を表示します。</p>
+<div id="totals" class="pills"><span class="note">まだポイントがありません。</span></div>
+</section>
+<section class="panel">
+<h2>欲しいスキル（検索メモ）</h2>
+<p class="note">自動装備検索は、正確なMH3G装備・装飾品・スキルデータを取り込んでから実装します。まずは条件をメモできます。</p>
+<div id="wanted"></div>
+<button class="secondary" id="addWanted">＋ 欲しいスキルを追加</button>
+</section>
+<section class="panel">
+<h2>構成の保存・読み込み</h2>
+<div class="row"><button id="save">この端末に保存</button><button class="secondary" id="load">保存データを読み込み</button></div>
+<div class="row" style="margin-top:8px"><button class="secondary" id="export">構成データを書き出す</button><button class="secondary" id="copy">構成をテキスト表示</button></div>
+<textarea id="dataBox" rows="5" placeholder="書き出したJSONや構成メモがここに表示されます" style="margin-top:10px"></textarea>
+<p id="msg" class="small" aria-live="polite"></p>
+</section>
+<section class="panel">
+<h2>今後追加する機能</h2>
+<div class="status"><div>✓ スマホ向け画面</div><div>✓ 装備・護石のポイント集計</div><div>✓ 構成の保存・書き出し</div><div class="warn">□ MH3G全装備・装飾品・スキルの公式データ整理</div><div class="warn">□ スキル条件を指定した自動装備検索</div><div class="warn">□ 防具の性別・剣士/ガンナー・ランク等の絞り込み</div></div>
+</section>
+</main>
+<footer>MH3Gファン向け非公式ツールの試作版。公式ゲームデータの完全性はまだ保証していません。</footer>
+<script>
+const parts=["武器","頭","胴","腕","腰","脚"];
+const gearRoot=document.getElementById("gearSlots");
+parts.forEach((part,i)=>{const div=document.createElement("div");div.className="gear panel";div.style.padding="10px";div.innerHTML=`<strong>${part}</strong><div class="grid two"><div><label>装備名</label><input data-part="${part}" data-field="name" placeholder="${part}の名前"></div><div><label>スロット数</label><select data-part="${part}" data-field="slots"><option>0</option><option>1</option><option>2</option><option>3</option></select></div><div style="grid-column:1/-1"><label>スキルポイント（例：斬れ味+2, 匠+1）</label><input data-part="${part}" data-field="skills" placeholder="スキル名とポイントをカンマ区切りで入力"></div></div>`;gearRoot.appendChild(div)});
+const charmSkills=document.getElementById("charmSkills"),wanted=document.getElementById("wanted");
+function addSkillRow(root,placeholder){const row=document.createElement("div");row.className="skillrow";row.innerHTML=`<input placeholder="${placeholder}" aria-label="スキル名"><input type="number" value="0" step="1" aria-label="ポイント"><button type="button" class="danger" aria-label="削除">×</button>`;row.querySelector("button").onclick=()=>{row.remove();updateTotals()};row.querySelectorAll("input").forEach(el=>el.addEventListener("input",updateTotals));root.appendChild(row);updateTotals()}
+document.getElementById("addCharmSkill").onclick=()=>addSkillRow(charmSkills,"スキル名");
+document.getElementById("addWanted").onclick=()=>addSkillRow(wanted,"欲しいスキル名");
+function parseSkills(s){const out={};s.split(/[,、，]/).forEach(item=>{const m=item.trim().match(/^(.+?)\s*([+-]\d+)$/);if(m)out[m[1].trim()]=(out[m[1].trim()]||0)+Number(m[2])});return out}
+function updateTotals(){const sums={};document.querySelectorAll('[data-field="skills"]').forEach(el=>Object.entries(parseSkills(el.value)).forEach(([k,v])=>sums[k]=(sums[k]||0)+v));charmSkills.querySelectorAll(".skillrow").forEach(row=>{const name=row.querySelectorAll("input")[0].value.trim(),val=Number(row.querySelectorAll("input")[1].value)||0;if(name)sums[name]=(sums[name]||0)+val});const target=document.getElementById("totals");target.innerHTML="";const entries=Object.entries(sums).sort((a,b)=>a[0].localeCompare(b[0],"ja"));if(!entries.length){target.innerHTML='<span class="note">まだポイントがありません。</span>';return}entries.forEach(([k,v])=>{const p=document.createElement("span");p.className="pill";p.innerHTML=`${escapeHtml(k)} <b>${v>0?"+":""}${v}</b>`;target.appendChild(p)})}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function getState(){return {gear:[...document.querySelectorAll(".gear")].map(g=>({part:g.querySelector("strong").textContent,name:g.querySelector('[data-field="name"]').value,slots:g.querySelector('[data-field="slots"]').value,skills:g.querySelector('[data-field="skills"]').value})),charmName:document.getElementById("charmName").value,charmSlots:document.getElementById("charmSlots").value,charmSkills:[...charmSkills.querySelectorAll(".skillrow")].map(r=>[...r.querySelectorAll("input")].map(i=>i.value)),wanted:[...wanted.querySelectorAll(".skillrow")].map(r=>[...r.querySelectorAll("input")].map(i=>i.value))}}
+function setState(s){if(!s)return;document.querySelectorAll(".gear").forEach((g,i)=>{const d=s.gear?.[i];if(d){g.querySelector('[data-field="name"]').value=d.name||"";g.querySelector('[data-field="slots"]').value=d.slots||"0";g.querySelector('[data-field="skills"]').value=d.skills||""}});document.getElementById("charmName").value=s.charmName||"";document.getElementById("charmSlots").value=s.charmSlots||"0";charmSkills.innerHTML="";wanted.innerHTML="";(s.charmSkills||[]).forEach(a=>{addSkillRow(charmSkills,"スキル名");const r=charmSkills.lastElementChild;r.querySelectorAll("input").forEach((e,i)=>e.value=a[i]||"")});(s.wanted||[]).forEach(a=>{addSkillRow(wanted,"欲しいスキル名");const r=wanted.lastElementChild;r.querySelectorAll("input").forEach((e,i)=>e.value=a[i]||"")});updateTotals()}
+document.querySelectorAll('input[data-field="skills"]').forEach(el=>el.addEventListener("input",updateTotals));
+const msg=document.getElementById("msg"),box=document.getElementById("dataBox");
+document.getElementById("save").onclick=()=>{try{localStorage.setItem("mh3g-skill-simulator",JSON.stringify(getState()));msg.textContent="このブラウザに保存しました。"}catch(e){msg.textContent="保存できませんでした。書き出し機能を使ってください。"}};
+document.getElementById("load").onclick=()=>{try{const s=localStorage.getItem("mh3g-skill-simulator");if(!s){msg.textContent="保存データがありません。";return}setState(JSON.parse(s));msg.textContent="保存データを読み込みました。"}catch(e){msg.textContent="読み込みに失敗しました。"}};
+document.getElementById("export").onclick=()=>{box.value=JSON.stringify(getState(),null,2);msg.textContent="構成データをテキスト欄に書き出しました。コピーして保管できます。"};
+document.getElementById("copy").onclick=()=>{const s=getState();box.value=s.gear.map(g=>`${g.part}: ${g.name||"未設定"} / スロット${g.slots} / ${g.skills||"ポイント未入力"}`).join("\n")+`\n護石: ${s.charmName||"未設定"} / スロット${s.charmSlots}\n`+Object.entries((()=>{const o={};document.querySelectorAll(".pill").forEach(p=>o[p.textContent]="");return o})()).map(x=>x[0]).join("\n");msg.textContent="構成をテキスト表示しました。"};
+updateTotals();
+</script>
+</body>
+</html>
